@@ -797,7 +797,7 @@ class KerasLatent(KerasPilot):
         return steering[0][0], throttle[0][0]
 
 
-def conv2d(filters, kernel, strides, layer_num, activation='relu'):
+def conv2d(filters, kernel, strides, layer_num, activation='elu'):
     """
     Helper function to create a standard valid-padded convolutional layer
     with square kernel and strides and unified naming convention
@@ -845,9 +845,9 @@ def default_n_linear(num_outputs, input_shape=(120, 160, 3)):
     drop = 0.2
     img_in = Input(shape=input_shape, name='img_in')
     x = core_cnn_layers(img_in, drop)
-    x = Dense(100, activation='relu', name='dense_1')(x)
+    x = Dense(100, activation='elu', name='dense_1')(x)
     x = Dropout(drop)(x)
-    x = Dense(50, activation='relu', name='dense_2')(x)
+    x = Dense(50, activation='elu', name='dense_2')(x)
     x = Dropout(drop)(x)
 
     outputs = []
@@ -869,15 +869,15 @@ def default_memory(input_shape=(120, 160, 3), mem_length=3, mem_depth=0):
     mem_in = Input(shape=(2 * mem_length,), name='mem_in')
     y = mem_in
     for i in range(mem_depth):
-        y = Dense(4 * mem_length, activation='relu', name=f'mem_{i}')(y)
+        y = Dense(4 * mem_length, activation='elu', name=f'mem_{i}')(y)
         y = Dropout(drop2)(y)
     for i in range(1, mem_length):
-        y = Dense(2 * (mem_length - i), activation='relu', name=f'mem_c_{i}')(y)
+        y = Dense(2 * (mem_length - i), activation='elu', name=f'mem_c_{i}')(y)
         y = Dropout(drop2)(y)
     x = concatenate([x, y])
-    x = Dense(100, activation='relu', name='dense_1')(x)
+    x = Dense(100, activation='elu', name='dense_1')(x)
     x = Dropout(drop)(x)
-    x = Dense(50, activation='relu', name='dense_2')(x)
+    x = Dense(50, activation='elu', name='dense_2')(x)
     x = Dropout(drop)(x)
     activation = ['tanh', 'sigmoid']
     outputs = [Dense(1, activation=activation[i], name='n_outputs' + str(i))(x)
@@ -890,9 +890,9 @@ def default_categorical(input_shape=(120, 160, 3)):
     drop = 0.2
     img_in = Input(shape=input_shape, name='img_in')
     x = core_cnn_layers(img_in, drop, l4_stride=2)
-    x = Dense(100, activation='relu', name="dense_1")(x)
+    x = Dense(100, activation='elu', name="dense_1")(x)
     x = Dropout(drop)(x)
-    x = Dense(50, activation='relu', name="dense_2")(x)
+    x = Dense(50, activation='elu', name="dense_2")(x)
     x = Dropout(drop)(x)
     # Categorical output of the angle into 15 bins
     angle_out = Dense(15, activation='softmax', name='angle_out')(x)
@@ -910,18 +910,18 @@ def default_imu(num_outputs, num_imu_inputs, input_shape):
     imu_in = Input(shape=(num_imu_inputs,), name="imu_in")
 
     x = core_cnn_layers(img_in, drop)
-    x = Dense(100, activation='relu')(x)
+    x = Dense(100, activation='elu')(x)
     x = Dropout(.1)(x)
     
     y = imu_in
-    y = Dense(14, activation='relu')(y)
-    y = Dense(14, activation='relu')(y)
-    y = Dense(14, activation='relu')(y)
+    y = Dense(14, activation='elu')(y)
+    y = Dense(14, activation='elu')(y)
+    y = Dense(14, activation='elu')(y)
     
     z = concatenate([x, y])
-    z = Dense(50, activation='relu')(z)
+    z = Dense(50, activation='elu')(z)
     z = Dropout(.1)(z)
-    z = Dense(50, activation='relu')(z)
+    z = Dense(50, activation='elu')(z)
     z = Dropout(.1)(z)
 
     outputs = []
@@ -940,18 +940,18 @@ def default_bhv(num_bvh_inputs, input_shape):
     bvh_in = Input(shape=(num_bvh_inputs,), name="xbehavior_in")
 
     x = core_cnn_layers(img_in, drop)
-    x = Dense(100, activation='relu')(x)
+    x = Dense(100, activation='elu')(x)
     x = Dropout(.1)(x)
     
     y = bvh_in
-    y = Dense(num_bvh_inputs * 2, activation='relu')(y)
-    y = Dense(num_bvh_inputs * 2, activation='relu')(y)
-    y = Dense(num_bvh_inputs * 2, activation='relu')(y)
+    y = Dense(num_bvh_inputs * 2, activation='elu')(y)
+    y = Dense(num_bvh_inputs * 2, activation='elu')(y)
+    y = Dense(num_bvh_inputs * 2, activation='elu')(y)
     
     z = concatenate([x, y])
-    z = Dense(100, activation='relu')(z)
+    z = Dense(100, activation='elu')(z)
     z = Dropout(.1)(z)
-    z = Dense(50, activation='relu')(z)
+    z = Dense(50, activation='elu')(z)
     z = Dropout(.1)(z)
     
     # Categorical output of the angle into 15 bins
@@ -969,10 +969,10 @@ def default_loc(num_locations, input_shape):
     img_in = Input(shape=input_shape, name='img_in')
 
     x = core_cnn_layers(img_in, drop)
-    x = Dense(100, activation='relu')(x)
+    x = Dense(100, activation='elu')(x)
     x = Dropout(drop)(x)
     
-    z = Dense(50, activation='relu')(x)
+    z = Dense(50, activation='elu')(x)
     z = Dropout(drop)(z)
 
     # linear output of the angle
@@ -998,27 +998,27 @@ def rnn_lstm(seq_length=3, num_outputs=2, input_shape=(120, 160, 3)):
     drop_out = 0.3
 
     x = img_in
-    x = TD(Convolution2D(24, (5, 5), strides=(2, 2), activation='relu'))(x)
+    x = TD(Convolution2D(24, (5, 5), strides=(2, 2), activation='elu'))(x)
     x = TD(Dropout(drop_out))(x)
-    x = TD(Convolution2D(32, (5, 5), strides=(2, 2), activation='relu'))(x)
+    x = TD(Convolution2D(32, (5, 5), strides=(2, 2), activation='elu'))(x)
     x = TD(Dropout(drop_out))(x)
-    x = TD(Convolution2D(32, (3, 3), strides=(2, 2), activation='relu'))(x)
+    x = TD(Convolution2D(32, (3, 3), strides=(2, 2), activation='elu'))(x)
     x = TD(Dropout(drop_out))(x)
-    x = TD(Convolution2D(32, (3, 3), strides=(1, 1), activation='relu'))(x)
+    x = TD(Convolution2D(32, (3, 3), strides=(1, 1), activation='elu'))(x)
     x = TD(Dropout(drop_out))(x)
     x = TD(MaxPooling2D(pool_size=(2, 2)))(x)
     x = TD(Flatten(name='flattened'))(x)
-    x = TD(Dense(100, activation='relu'))(x)
+    x = TD(Dense(100, activation='elu'))(x)
     x = TD(Dropout(drop_out))(x)
 
     x = LSTM(128, return_sequences=True, name="LSTM_seq")(x)
     x = Dropout(.1)(x)
     x = LSTM(128, return_sequences=False, name="LSTM_fin")(x)
     x = Dropout(.1)(x)
-    x = Dense(128, activation='relu')(x)
+    x = Dense(128, activation='elu')(x)
     x = Dropout(.1)(x)
-    x = Dense(64, activation='relu')(x)
-    x = Dense(10, activation='relu')(x)
+    x = Dense(64, activation='elu')(x)
+    x = Dense(10, activation='elu')(x)
     out = Dense(num_outputs, activation='linear', name='model_outputs')(x)
     model = Model(inputs=[img_in], outputs=[out], name='lstm')
     return model
@@ -1040,28 +1040,28 @@ def build_3d_cnn(input_shape, s, num_outputs):
     # Second layer
     x = Conv3D(
             filters=16, kernel_size=(3, 3, 3), strides=(1, 3, 3),
-            data_format='channels_last', padding='same', activation='relu')(x)
+            data_format='channels_last', padding='same', activation='elu')(x)
     x = MaxPooling3D(
             pool_size=(1, 2, 2), strides=(1, 2, 2), padding='valid',
             data_format=None)(x)
     # Third layer
     x = Conv3D(
             filters=32, kernel_size=(3, 3, 3), strides=(1, 1, 1),
-            data_format='channels_last', padding='same', activation='relu')(x)
+            data_format='channels_last', padding='same', activation='elu')(x)
     x = MaxPooling3D(
         pool_size=(1, 2, 2), strides=(1, 2, 2), padding='valid',
         data_format=None)(x)
     # Fourth layer
     x = Conv3D(
             filters=64, kernel_size=(3, 3, 3), strides=(1, 1, 1),
-            data_format='channels_last', padding='same', activation='relu')(x)
+            data_format='channels_last', padding='same', activation='elu')(x)
     x = MaxPooling3D(
             pool_size=(1, 2, 2), strides=(1, 2, 2), padding='valid',
             data_format=None)(x)
     # Fifth layer
     x = Conv3D(
             filters=128, kernel_size=(3, 3, 3), strides=(1, 1, 1),
-            data_format='channels_last', padding='same', activation='relu')(x)
+            data_format='channels_last', padding='same', activation='elu')(x)
     x = MaxPooling3D(
             pool_size=(1, 2, 2), strides=(1, 2, 2), padding='valid',
             data_format=None)(x)
@@ -1070,12 +1070,12 @@ def build_3d_cnn(input_shape, s, num_outputs):
 
     x = Dense(256)(x)
     x = BatchNormalization()(x)
-    x = Activation('relu')(x)
+    x = Activation('elu')(x)
     x = Dropout(drop)(x)
 
     x = Dense(256)(x)
     x = BatchNormalization()(x)
-    x = Activation('relu')(x)
+    x = Activation('elu')(x)
     x = Dropout(drop)(x)
 
     out = Dense(num_outputs, name='outputs')(x)
@@ -1090,21 +1090,21 @@ def default_latent(num_outputs, input_shape):
     drop = 0.2
     img_in = Input(shape=input_shape, name='img_in')
     x = img_in
-    x = Convolution2D(24, 5, strides=2, activation='relu', name="conv2d_1")(x)
+    x = Convolution2D(24, 5, strides=2, activation='elu', name="conv2d_1")(x)
     x = Dropout(drop)(x)
-    x = Convolution2D(32, 5, strides=2, activation='relu', name="conv2d_2")(x)
+    x = Convolution2D(32, 5, strides=2, activation='elu', name="conv2d_2")(x)
     x = Dropout(drop)(x)
-    x = Convolution2D(32, 5, strides=2, activation='relu', name="conv2d_3")(x)
+    x = Convolution2D(32, 5, strides=2, activation='elu', name="conv2d_3")(x)
     x = Dropout(drop)(x)
-    x = Convolution2D(32, 3, strides=1, activation='relu', name="conv2d_4")(x)
+    x = Convolution2D(32, 3, strides=1, activation='elu', name="conv2d_4")(x)
     x = Dropout(drop)(x)
-    x = Convolution2D(32, 3, strides=1, activation='relu', name="conv2d_5")(x)
+    x = Convolution2D(32, 3, strides=1, activation='elu', name="conv2d_5")(x)
     x = Dropout(drop)(x)
-    x = Convolution2D(64, 3, strides=2, activation='relu', name="conv2d_6")(x)
+    x = Convolution2D(64, 3, strides=2, activation='elu', name="conv2d_6")(x)
     x = Dropout(drop)(x)
-    x = Convolution2D(64, 3, strides=2, activation='relu', name="conv2d_7")(x)
+    x = Convolution2D(64, 3, strides=2, activation='elu', name="conv2d_7")(x)
     x = Dropout(drop)(x)
-    x = Convolution2D(64, 1, strides=2, activation='relu', name="latent")(x)
+    x = Convolution2D(64, 1, strides=2, activation='elu', name="latent")(x)
 
     y = Conv2DTranspose(filters=64, kernel_size=3, strides=2,
                         name="deconv2d_1")(x)
@@ -1119,11 +1119,11 @@ def default_latent(num_outputs, input_shape):
     y = Conv2DTranspose(filters=1, kernel_size=3, strides=2, name="img_out")(y)
     
     x = Flatten(name='flattened')(x)
-    x = Dense(256, activation='relu')(x)
+    x = Dense(256, activation='elu')(x)
     x = Dropout(drop)(x)
-    x = Dense(100, activation='relu')(x)
+    x = Dense(100, activation='elu')(x)
     x = Dropout(drop)(x)
-    x = Dense(50, activation='relu')(x)
+    x = Dense(50, activation='elu')(x)
     x = Dropout(drop)(x)
 
     outputs = [y]

@@ -20,8 +20,17 @@ import tensorflow as tf
 import numpy as np
 
 logger = logging.getLogger(__name__)
+"""
+Putting it here didn't seem to change behavior 
+gpus = tf.config.list_physical_devices('GPU')
+print("GPU is", "available" if len(gpus) > 0 else "NOT AVAILABLE")
 
-
+for gpu in gpus:
+    print("Setting memory growth for", gpu)
+    tf.config.experimental.set_memory_growth(gpu, True)
+    # Make sure you add the following line to avoid crashing in training phase
+    tf.config.set_visible_devices(gpu, 'GPU') 
+"""
 class BatchSequence(object):
     """
     The idea is to have a shallow sequence with types that can hydrate
@@ -106,6 +115,7 @@ def train(cfg: Config, tub_paths: str, model: str = None,
     """
     Train the model
     """
+    
     database = PilotDatabase(cfg)
     if model_type is None:
         model_type = cfg.DEFAULT_MODEL_TYPE
