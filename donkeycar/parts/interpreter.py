@@ -141,7 +141,8 @@ class KerasInterpreter(Interpreter):
         if type(output_shape) is not list:
             output_shape = [output_shape]
 
-        self.input_keys = self.model.input_names
+        #self.input_keys = self.model.input_names doesn't work with tensorflow 2.16+
+        self.input_keys = [input_tensor.name for input_tensor in self.model.input]
         self.output_keys = self.model.output_names
         self.shapes = (dict(zip(self.input_keys, input_shape)),
                        dict(zip(self.output_keys, output_shape)))

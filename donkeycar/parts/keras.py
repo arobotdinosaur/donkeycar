@@ -174,8 +174,9 @@ class KerasPilot(ABC):
             validation_steps=validation_steps,
             epochs=epochs,
             verbose=verbose,
-            workers=1,
-            use_multiprocessing=False)
+            #workers=1, These options don't work in 2.16+, but commenting them out doesn't seem to break it
+            #use_multiprocessing=False
+            )
         toc = datetime.datetime.now()
         logger.info(f'////////// Finished training in: {toc - tic} //////////')
 
